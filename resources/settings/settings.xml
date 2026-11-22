@@ -1,24 +1,143 @@
 <settings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://developer.garmin.com/downloads/connect-iq/resources.xsd">
 
-    <setting propertyKey="@Properties.BackgroundColor" title="@Strings.BackgroundColorTitle">
+    <setting propertyKey="@Properties.SecondTimeZone" title="@Strings.SecondTimeZoneTitle">
         <settingConfig type="list">
-            <listEntry value="0x000000">@Strings.ColorBlack</listEntry>
-            <listEntry value="0x555555">@Strings.ColorDarkGray</listEntry>
-            <listEntry value="0xAAAAAA">@Strings.ColorLightGray</listEntry>
-            <listEntry value="0xFFFFFF">@Strings.ColorWhite</listEntry>
+            <listEntry value="0">@Strings.Zone0</listEntry>
+            <listEntry value="1">@Strings.Zone1</listEntry>
+            <listEntry value="2">@Strings.Zone2</listEntry>
+            <listEntry value="3">@Strings.Zone3</listEntry>
+            <listEntry value="4">@Strings.Zone4</listEntry>
+            <listEntry value="5">@Strings.Zone5</listEntry>
+            <listEntry value="6">@Strings.Zone6</listEntry>
+            <listEntry value="7">@Strings.Zone7</listEntry>
+            <listEntry value="8">@Strings.Zone8</listEntry>
+            <listEntry value="9">@Strings.Zone9</listEntry>
+            <listEntry value="10">@Strings.Zone10</listEntry>
+            <listEntry value="11">@Strings.Zone11</listEntry>
+            <listEntry value="12">@Strings.Zone12</listEntry>
+            <listEntry value="13">@Strings.Zone13</listEntry>
+            <listEntry value="14">@Strings.Zone14</listEntry>
+            <listEntry value="15">@Strings.Zone15</listEntry>
+            <listEntry value="16">@Strings.Zone16</listEntry>
+            <listEntry value="17">@Strings.Zone17</listEntry>
+            <listEntry value="18">@Strings.Zone18</listEntry>
+            <listEntry value="19">@Strings.Zone19</listEntry>
+            <listEntry value="20">@Strings.Zone20</listEntry>
+            <listEntry value="21">@Strings.Zone21</listEntry>
+            <listEntry value="22">@Strings.Zone22</listEntry>
+            <listEntry value="23">@Strings.Zone23</listEntry>
+            <listEntry value="24">@Strings.Zone24</listEntry>
+            <listEntry value="25">@Strings.Zone25</listEntry>
+            <listEntry value="26">@Strings.Zone26</listEntry>
+            <listEntry value="27">@Strings.Zone27</listEntry>
+            <listEntry value="28">@Strings.Zone28</listEntry>
+            <listEntry value="29">@Strings.Zone29</listEntry>
+            <listEntry value="30">@Strings.Zone30</listEntry>
+            <listEntry value="31">@Strings.Zone31</listEntry>
+            <listEntry value="32">@Strings.Zone32</listEntry>
+            <listEntry value="33">@Strings.Zone33</listEntry>
+            <listEntry value="34">@Strings.Zone34</listEntry>
+            <listEntry value="35">@Strings.Zone35</listEntry>
+            <listEntry value="36">@Strings.Zone36</listEntry>
+            <listEntry value="37">@Strings.Zone37</listEntry>
+            <listEntry value="38">@Strings.Zone38</listEntry>
+            <listEntry value="39">@Strings.Zone39</listEntry>
+            <listEntry value="40">@Strings.Zone40</listEntry>
         </settingConfig>
     </setting>
 
-    <setting propertyKey="@Properties.ForegroundColor" title="@Strings.ForegroundColorTitle">
+    <setting propertyKey="@Properties.LondonHandColor" title="@Strings.LondonHandColorTitle">
         <settingConfig type="list">
-            <listEntry value="0x000000">@Strings.ColorBlack</listEntry>
-            <listEntry value="0x0000FF">@Strings.ColorBlue</listEntry>
-            <listEntry value="0xFF0000">@Strings.ColorRed</listEntry>
-            <listEntry value="0xFFFFFF">@Strings.ColorWhite</listEntry>
+            <listEntry value="16718362">@Strings.ColorRed</listEntry>
+            <listEntry value="2241535">@Strings.ColorBlue</listEntry>
+            <listEntry value="52292">@Strings.ColorGreen</listEntry>
+            <listEntry value="16746496">@Strings.ColorOrange</listEntry>
+            <listEntry value="16766720">@Strings.ColorYellow</listEntry>
+            <listEntry value="16777215">@Strings.ColorWhite</listEntry>
         </settingConfig>
     </setting>
 
-    <setting propertyKey="@Properties.UseMilitaryFormat" title="@Strings.MilitaryFormatTitle">
+    <setting propertyKey="@Properties.Field1Type" title="@Strings.Field1Title">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.TypeNone</listEntry>
+            <listEntry value="1">@Strings.TypeHR</listEntry>
+            <listEntry value="2">@Strings.TypeBB</listEntry>
+            <listEntry value="3">@Strings.TypeRecovery</listEntry>
+            <listEntry value="4">@Strings.TypeSteps</listEntry>
+            <listEntry value="5">@Strings.TypeCalories</listEntry>
+            <listEntry value="6">@Strings.TypeDistance</listEntry>
+            <listEntry value="7">@Strings.TypeStress</listEntry>
+            <listEntry value="8">@Strings.TypeLondon</listEntry>
+            <listEntry value="9">@Strings.TypeDigital</listEntry>
+            <listEntry value="10">@Strings.TypeDateDay</listEntry>
+            <listEntry value="11">@Strings.TypeDateFull</listEntry>
+        </settingConfig>
+    </setting>
+
+    <setting propertyKey="@Properties.Field2Type" title="@Strings.Field2Title">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.TypeNone</listEntry>
+            <listEntry value="1">@Strings.TypeHR</listEntry>
+            <listEntry value="2">@Strings.TypeBB</listEntry>
+            <listEntry value="3">@Strings.TypeRecovery</listEntry>
+            <listEntry value="4">@Strings.TypeSteps</listEntry>
+            <listEntry value="5">@Strings.TypeCalories</listEntry>
+            <listEntry value="6">@Strings.TypeDistance</listEntry>
+            <listEntry value="7">@Strings.TypeStress</listEntry>
+            <listEntry value="8">@Strings.TypeLondon</listEntry>
+            <listEntry value="9">@Strings.TypeDigital</listEntry>
+            <listEntry value="10">@Strings.TypeDateDay</listEntry>
+            <listEntry value="11">@Strings.TypeDateFull</listEntry>
+        </settingConfig>
+    </setting>
+
+    <setting propertyKey="@Properties.Field3Type" title="@Strings.Field3Title">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.TypeNone</listEntry>
+            <listEntry value="1">@Strings.TypeHR</listEntry>
+            <listEntry value="2">@Strings.TypeBB</listEntry>
+            <listEntry value="3">@Strings.TypeRecovery</listEntry>
+            <listEntry value="4">@Strings.TypeSteps</listEntry>
+            <listEntry value="5">@Strings.TypeCalories</listEntry>
+            <listEntry value="6">@Strings.TypeDistance</listEntry>
+            <listEntry value="7">@Strings.TypeStress</listEntry>
+            <listEntry value="8">@Strings.TypeLondon</listEntry>
+            <listEntry value="9">@Strings.TypeDigital</listEntry>
+            <listEntry value="10">@Strings.TypeDateDay</listEntry>
+            <listEntry value="11">@Strings.TypeDateFull</listEntry>
+        </settingConfig>
+    </setting>
+
+    <setting propertyKey="@Properties.Field4Type" title="@Strings.Field4Title">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.TypeNone</listEntry>
+            <listEntry value="1">@Strings.TypeHR</listEntry>
+            <listEntry value="2">@Strings.TypeBB</listEntry>
+            <listEntry value="3">@Strings.TypeRecovery</listEntry>
+            <listEntry value="4">@Strings.TypeSteps</listEntry>
+            <listEntry value="5">@Strings.TypeCalories</listEntry>
+            <listEntry value="6">@Strings.TypeDistance</listEntry>
+            <listEntry value="7">@Strings.TypeStress</listEntry>
+            <listEntry value="8">@Strings.TypeLondon</listEntry>
+            <listEntry value="9">@Strings.TypeDigital</listEntry>
+            <listEntry value="10">@Strings.TypeDateDay</listEntry>
+            <listEntry value="11">@Strings.TypeDateFull</listEntry>
+        </settingConfig>
+    </setting>
+
+    <setting propertyKey="@Properties.ShowIcons" title="@Strings.ShowIconsTitle">
+        <settingConfig type="boolean" />
+    </setting>
+
+    <setting propertyKey="@Properties.FieldsOverHands" title="@Strings.FieldsOverHandsTitle">
+        <settingConfig type="boolean" />
+    </setting>
+
+    <setting propertyKey="@Properties.ShowSeconds" title="@Strings.ShowSecondsTitle">
+        <settingConfig type="boolean" />
+    </setting>
+
+    <setting propertyKey="@Properties.BatteryLit" title="@Strings.BatteryLitTitle">
         <settingConfig type="boolean" />
     </setting>
 

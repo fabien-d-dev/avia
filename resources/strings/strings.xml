@@ -2,15 +2,78 @@
 
     <string id="AppName">avia</string>
 
-    <string id="BackgroundColorTitle">Background Color</string>
-    <string id="ForegroundColorTitle">Foreground Color</string>
-    <string id="MilitaryFormatTitle">Military Format for 24 Hour Time</string>
+    <string id="SecondTimeZoneTitle">Second time zone (red hand)</string>
+    <string id="Zone0">London (GMT/BST)</string>
+    <string id="Zone1">Paris / Berlin / Rome (CET)</string>
+    <string id="Zone2">Athens / Helsinki (EET)</string>
+    <string id="Zone3">Istanbul (UTC+3)</string>
+    <string id="Zone4">Moscow (UTC+3)</string>
+    <string id="Zone5">Dubai (UTC+4)</string>
+    <string id="Zone6">Kabul (UTC+4:30)</string>
+    <string id="Zone7">Karachi (UTC+5)</string>
+    <string id="Zone8">Delhi (UTC+5:30)</string>
+    <string id="Zone9">Kathmandu (UTC+5:45)</string>
+    <string id="Zone10">Dhaka (UTC+6)</string>
+    <string id="Zone11">Bangkok (UTC+7)</string>
+    <string id="Zone12">Singapore (UTC+8)</string>
+    <string id="Zone13">Hong Kong (UTC+8)</string>
+    <string id="Zone14">Perth (UTC+8)</string>
+    <string id="Zone15">Tokyo (UTC+9)</string>
+    <string id="Zone16">Adelaide (UTC+9:30/10:30)</string>
+    <string id="Zone17">Darwin (UTC+9:30)</string>
+    <string id="Zone18">Sydney (UTC+10/11)</string>
+    <string id="Zone19">Brisbane (UTC+10)</string>
+    <string id="Zone20">Noumea (UTC+11)</string>
+    <string id="Zone21">Auckland (UTC+12/13)</string>
+    <string id="Zone22">Honolulu (UTC-10)</string>
+    <string id="Zone23">Anchorage (UTC-9/-8)</string>
+    <string id="Zone24">Los Angeles (UTC-8/-7)</string>
+    <string id="Zone25">Denver (UTC-7/-6)</string>
+    <string id="Zone26">Phoenix (UTC-7)</string>
+    <string id="Zone27">Chicago (UTC-6/-5)</string>
+    <string id="Zone28">Mexico City (UTC-6)</string>
+    <string id="Zone29">New York (UTC-5/-4)</string>
+    <string id="Zone30">Bogota (UTC-5)</string>
+    <string id="Zone31">Halifax (UTC-4/-3)</string>
+    <string id="Zone32">Caracas (UTC-4)</string>
+    <string id="Zone33">Sao Paulo (UTC-3)</string>
+    <string id="Zone34">Buenos Aires (UTC-3)</string>
+    <string id="Zone35">Lagos (UTC+1)</string>
+    <string id="Zone36">Johannesburg (UTC+2)</string>
+    <string id="Zone37">Nairobi (UTC+3)</string>
+    <string id="Zone38">Tehran (UTC+3:30)</string>
+    <string id="Zone39">UTC</string>
+    <string id="Zone40">Reykjavik (UTC)</string>
 
-    <string id="ColorBlack">Black</string>
-    <string id="ColorDarkGray">Dark Gray</string>
-    <string id="ColorLightGray">Light Gray</string>
-    <string id="ColorWhite">White</string>
-    <string id="ColorBlue">Blue</string>
+    <string id="Field1Title">Field 1 (top)</string>
+    <string id="Field2Title">Field 2 (bottom)</string>
+    <string id="Field3Title">Field 3 (right)</string>
+    <string id="Field4Title">Field 4 (left)</string>
+    <string id="ShowIconsTitle">Show icons instead of labels</string>
+    <string id="FieldsOverHandsTitle">Show data fields above the hands</string>
+
+    <string id="TypeNone">Empty</string>
+    <string id="TypeHR">Heart rate</string>
+    <string id="TypeBB">Body Battery</string>
+    <string id="TypeRecovery">Recovery time</string>
+    <string id="TypeSteps">Steps</string>
+    <string id="TypeCalories">Calories</string>
+    <string id="TypeDistance">Distance</string>
+    <string id="TypeStress">Stress</string>
+    <string id="TypeLondon">Second time zone</string>
+    <string id="TypeDigital">Digital time</string>
+    <string id="TypeDateDay">Date (dd)</string>
+    <string id="TypeDateFull">Date (dd mm weekday)</string>
+
+    <string id="ShowSecondsTitle">Show seconds hand</string>
+    <string id="LondonHandColorTitle">Second time zone hand color</string>
+    <string id="BatteryLitTitle">Light up battery gauge</string>
+
     <string id="ColorRed">Red</string>
+    <string id="ColorBlue">Blue</string>
+    <string id="ColorGreen">Green</string>
+    <string id="ColorOrange">Orange</string>
+    <string id="ColorYellow">Yellow</string>
+    <string id="ColorWhite">White</string>
 
 </strings>
