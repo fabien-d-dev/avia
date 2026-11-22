@@ -1,0 +1,30 @@
+# Build 
+bin/
+*.prg
+*.iq
+*.prg.debug.xml
+*.json
+!.vscode/*.json
+
+# Clé de développeur
+developer_key
+*.der
+*.pem
+
+# Simulateur et fichiers temporaires
+*.log
+internal-mir/
+gen/
+mir/
+
+# VS Code 
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/extensions.json
+
+# Système
+.DS_Store
+Thumbs.db
+desktop.ini
