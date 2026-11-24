@@ -148,7 +148,7 @@ class aviaView extends WatchUi.WatchFace {
         var londonColor = getNum("LondonHandColor", C_RED);
         var batteryLit = getBool("BatteryLit", true);
         var showIcons = getBool("ShowIcons", true);
-        var fieldsOver = getBool("FieldsOverHands", true);
+        var fieldsOver = getBool("FieldsAbove", true);
         var f1 = getNum("Field1Type", 8);
         var f2 = getNum("Field2Type", 3);
         var f3 = getNum("Field3Type", 2);
@@ -640,22 +640,63 @@ class aviaView extends WatchUi.WatchFace {
         line(dc, ang, -40.0, 177.0);
     }
 
-    // Aiguille rouge : heure du fuseau secondaire sur l'échelle 24 h
+        // Rectangle le long de l'aiguille : de v0 à v1, demi-largeur hw
+    private function bar(dc as Dc, angle as Float, v0 as Float, v1 as Float, hw as Float) as Void {
+        dc.fillPolygon([
+            pt(angle, -hw, v0), pt(angle, hw, v0),
+            pt(angle, hw, v1),  pt(angle, -hw, v1)
+        ] as Array<[Numeric, Numeric]>);
+    }
+
+    // Triangle agrandi ou réduit de k autour de son centre (cv = position du centre sur l'axe)
+    private function tri(dc as Dc, angle as Float, hw as Float, base as Float, tip as Float,
+                         cv as Float, k as Float) as Void {
+        var vb = cv + k * (base - cv);
+        dc.fillPolygon([
+            pt(angle, -hw * k, vb),
+            pt(angle, hw * k, vb),
+            pt(angle, 0.0, cv + k * (tip - cv))
+        ] as Array<[Numeric, Numeric]>);
+    }
+
+    // Aiguille du fuseau secondaire sur l'échelle 24 h :
+    // tige rouge + triangle au bord rouge et au centre plein noir, le tout bordé
     private function drawLondonHand(dc as Dc, color as Number) as Void {
+        // Réglages (base 400 px)
+        var tail = -20.0;         // queue derrière le centre
+        var base = 143.0;         // base du triangle
+        var tip = 174.0;          // pointe du triangle
+        var halfW = 11.0;         // demi-largeur du triangle
+        var stemW = 1.0;          // demi-épaisseur de la tige
+        var edge = 2.0;           // épaisseur du bord rouge du triangle
+        var border = 3.0;         // épaisseur de la bordure autour de l'aiguille
+        var borderColor = 0x000000;
+        var fillColor = 0x000000;
+
         var t = secondInfo();
         var ang = (t.hour + t.min / 60.0) * 15.0;
 
-        dc.setColor(color, Graphics.COLOR_TRANSPARENT);
-        dc.setPenWidth(px(2.0));
-        line(dc, ang, -20.0, 150.0);
+        // Centre du triangle et rayon de son cercle inscrit (pour des bords réguliers)
+        var h = tip - base;
+        var leg = Math.sqrt(halfW * halfW + h * h);
+        var inr = halfW * h / (leg + halfW);
+        var cv = (leg * base + halfW * tip) / (leg + halfW);
+        var kOut = 1.0 + border / inr;
+        var kIn = 1.0 - edge / inr;
 
-        // Triangle creux au bout
-        var a = rot(ang, -11.0, 143.0);
-        var b = rot(ang, 11.0, 143.0);
-        var c = rot(ang, 0.0, 174.0);
-        dc.drawLine(a[0], a[1], c[0], c[1]);
-        dc.drawLine(b[0], b[1], c[0], c[1]);
-        dc.drawLine(a[0], a[1], b[0], b[1]);
+        // 1. Bordure autour de la tige et du triangle
+        dc.setColor(borderColor, Graphics.COLOR_TRANSPARENT);
+        bar(dc, ang, tail - border, base, stemW + border);
+        tri(dc, ang, halfW, base, tip, cv, kOut);
+
+        // 2. Tige et triangle rouges
+        dc.setColor(color, Graphics.COLOR_TRANSPARENT);
+        bar(dc, ang, tail, base, stemW);
+        tri(dc, ang, halfW, base, tip, cv, 1.0);
+
+        // 3. Centre du triangle plein noir
+        dc.setColor(fillColor, Graphics.COLOR_TRANSPARENT);
+        tri(dc, ang, halfW, base, tip, cv, kIn);
     }
 
     private function drawCenter(dc as Dc) as Void {

@@ -6,6 +6,8 @@
     <property id="Field4Type" type="number">1</property>
     <property id="ShowIcons" type="boolean">true</property>
     <property id="FieldsOverHands" type="boolean">false</property>
+    <property id="FieldsAbove" type="boolean">true</property>
+    
 
     <property id="SecondTimeZone" type="number">0</property>
     <property id="ShowSeconds" type="boolean">true</property>
