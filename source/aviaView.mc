@@ -16,7 +16,7 @@ class aviaView extends WatchUi.WatchFace {
     private const C_BLUE  = 0x2233FF;
     private const C_WHITE = 0xFFFFFF;
     private const C_GREY  = 0x9A9A9A;
-    private const C_FIELD = 0xD0D0D0;   // couleur du texte des champs
+    private const C_FIELD = 0xFFFFFF;   // couleur du texte des champs
 
     // Aiguilles : facette claire / facette ombrée / contour
     private const HAND_LIGHT   = 0xFFFFFF;
@@ -43,8 +43,8 @@ class aviaView extends WatchUi.WatchFace {
     // Tailles de police (base 400 px)
     private const SIZE_NUM   = 34;
     private const SIZE_SMALL = 20;
-    private const SIZE_TEXT  = 28;   // champs 1 et 2 (haut / bas)
-    private const SIZE_SIDE  = 22;   // champs 3 et 4 (droite / gauche)
+    private const SIZE_TEXT  = 48;   // champs 1 et 2 (haut / bas)
+    private const SIZE_SIDE  = 45;   // champs 3 et 4 (droite / gauche)
 
     // Tailles des logos (base 400 px)
     private const ICON_BIG   = 24.0; // champs 1 et 2
@@ -131,7 +131,7 @@ class aviaView extends WatchUi.WatchFace {
         WatchUi.requestUpdate();
     }
 
-    function onUpdate(dc as Dc) as Void {
+        function onUpdate(dc as Dc) as Void {
         dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
         dc.clear();
         if (dc has :setAntiAlias) {
@@ -149,7 +149,8 @@ class aviaView extends WatchUi.WatchFace {
         var batteryLit = getBool("BatteryLit", true);
         var showIcons = getBool("ShowIcons", true);
         var fieldsOver = getBool("FieldsAbove", true);
-        var f1 = getNum("Field1Type", 8);
+        // var f1 = getNum("Field1Type", 8); london
+        var f1 = getNum("Field1Type", 9);
         var f2 = getNum("Field2Type", 3);
         var f3 = getNum("Field3Type", 2);
         var f4 = getNum("Field4Type", 1);
@@ -159,8 +160,14 @@ class aviaView extends WatchUi.WatchFace {
             _zone = 0;
         }
 
+        // En veille : le cadran reste affiché, seule la trotteuse disparaît.
+        // Mettre keepDialAsleep à false pour revenir à l'ancien comportement
+        // (aiguilles seules en veille).
+        var keepDialAsleep = true;
+        var showDial = (!_lowPower) || keepDialAsleep;
+
         // Décor
-        if (!_lowPower) {
+        if (showDial) {
             drawBezel(dc);
             drawOuterTicks(dc);
             drawMarkers(dc);
@@ -169,20 +176,23 @@ class aviaView extends WatchUi.WatchFace {
         }
 
         // Champs derrière les aiguilles (option désactivée)
-        if (!_lowPower && !fieldsOver) {
+        if (showDial && !fieldsOver) {
             drawFields(dc, f1, f2, f3, f4, showIcons, false);
         }
 
-        // Aiguilles
+        // Aiguille du fuseau secondaire : sous les feuilles heures / minutes
+        drawLondonHand(dc, londonColor);
+
+        // Feuilles heures et minutes
         drawHands(dc, h, m, sc);
 
+        // Trotteuse : uniquement quand l'écran est actif
         if (!_lowPower && showSeconds) {
             drawSecond(dc, sc);
         }
-        drawLondonHand(dc, londonColor);
 
         // Champs devant les aiguilles (option activée), avec contour noir
-        if (!_lowPower && fieldsOver) {
+        if (showDial && fieldsOver) {
             drawFields(dc, f1, f2, f3, f4, showIcons, true);
         }
 
@@ -426,12 +436,7 @@ class aviaView extends WatchUi.WatchFace {
         }
         if (type == 9) {
             var c = System.getClockTime();
-            var hh = c.hour;
-            if (!System.getDeviceSettings().is24Hour) {
-                hh = hh % 12;
-                if (hh == 0) { hh = 12; }
-            }
-            return hh.format("%02d") + ":" + c.min.format("%02d");
+            return c.hour.format("%02d") + ":" + c.min.format("%02d");
         }
         if (type == 10) {
             var d = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
