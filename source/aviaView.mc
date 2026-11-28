@@ -16,7 +16,6 @@ class aviaView extends WatchUi.WatchFace {
     private const C_BLUE  = 0x2233FF;
     private const C_WHITE = 0xFFFFFF;
     private const C_GREY  = 0x9A9A9A;
-    private const C_FIELD = 0xFFFFFF;   // couleur du texte des champs
 
     // Aiguilles : facette claire / facette ombrée / contour
     private const HAND_LIGHT   = 0xFFFFFF;
@@ -40,21 +39,68 @@ class aviaView extends WatchUi.WatchFace {
     private const RING_R_IN   = 172.0;
     private const RING_R_HOUR = 188.0;
 
-    // Tailles de police (base 400 px)
-    private const SIZE_NUM   = 34;
-    private const SIZE_SMALL = 20;
-    private const SIZE_TEXT  = 48;   // champs 1 et 2 (haut / bas)
-    private const SIZE_SIDE  = 45;   // champs 3 et 4 (droite / gauche)
+    // Tailles de police du décor (base 400 px)
+    private const SIZE_NUM   = 34;  // numéros 24h
+    private const SIZE_SMALL = 20;  // numéros batterie + "Battery"
 
-    // Tailles des logos (base 400 px)
-    private const ICON_BIG   = 24.0; // champs 1 et 2
-    private const ICON_SIDE  = 18.0; // champs 3 et 4
+    // ===== CHAMPS DE DONNÉES : réglages indépendants =====
+    // Pour chaque champ : taille du texte, gras, taille du logo, couleur du texte,
+    // épaisseur du contour, position.
+    // Positions en base 400 px par rapport au centre (x vers la droite, y vers le bas).
+    // La couleur ne change que le texte : chaque logo garde sa couleur propre.
 
-    // Positions des champs (base 400 px, par rapport au centre)
-    private const F1_Y = -55.0;      // haut
-    private const F2_Y =  55.0;      // bas
-    private const F3_X =  72.0;      // droite (centre du contenu)
-    private const F4_X = -68.0;      // gauche
+    // Contour des données (suit la forme du texte et des logos)
+    private const BORDER_COLOR = 0x000000;  // couleur du contour
+    private const BORDER_ICONS = true;      // contour aussi sur les logos
+    // Épaisseur du contour par champ (base 400 px). 0.0 = pas de contour.
+    // Au-delà de 3.0, le contour peut devenir irrégulier.
+    private const BORDER_F1 = 2.0;
+    private const BORDER_F2 = 2.0;
+    private const BORDER_F3 = 2.0;
+    private const BORDER_F4 = 2.0;
+    private const BORDER_F5 = 2.0;
+
+    // Champ 1 : haut
+    private const SIZE_F1 = 48;
+    private const BOLD_F1 = false;
+    private const ICON_F1 = 24.0;
+    private const COL_F1  = 0xFFFFFF;
+    private const F1_X    = 0.0;
+    private const F1_Y    = -66.0;
+
+    // Champ 2 : bas
+    private const SIZE_F2 = 40;
+    private const BOLD_F2 = false;
+    private const ICON_F2 = 15.0;
+    private const COL_F2  = 0xFFFFFF;
+    private const F2_X    = 0.0;
+    private const F2_Y    = 66.0;
+
+    // Champ 3 : gauche, sous le champ 4
+    private const SIZE_F3 = 43;
+    private const BOLD_F3 = true;
+    private const ICON_F3 = 20.0;
+    private const COL_F3  = 0xFFFFFF;
+    private const F3_X    = -70.0;
+    private const F3_Y    = 22.0;
+
+    // Champ 4 : gauche (heart rate)
+    private const SIZE_F4 = 43;
+    private const BOLD_F4 = true;
+    private const ICON_F4 = 17.0;
+    private const COL_F4  = 0xFFFFFF;
+    private const F4_X    = -67.0;
+    private const F4_Y    = -21.0;
+
+    // Champ 5 : droite, jour de la semaine au-dessus du jour du mois
+    // (même taille, même police et même couleur pour les deux lignes)
+    private const SHOW_F5 = true;
+    private const SIZE_F5 = 33;
+    private const BOLD_F5 = true;
+    private const COL_F5  = 0xFFFFFF;
+    private const F5_X    = 72.0;
+    private const F5_Y    = 0.0;
+    private const F5_GAP  = 32.0;   // distance entre les deux lignes (0 = superposées)
 
     // ---- Fuseaux horaires (même ordre que les entrées Zone0..Zone40 des réglages) ----
     // Règles d'heure d'été : 0 = aucune, 1 = Europe, 2 = USA/Canada,
@@ -87,10 +133,14 @@ class aviaView extends WatchUi.WatchFace {
     private var _s as Float = 1.0;
     private var _lowPower as Boolean = false;
     private var _zone as Number = 0;      // fuseau secondaire choisi
+    private var _iconMono as Number = -1; // >= 0 : logos dessinés d'une seule couleur (contour)
     private var _fontNum as Graphics.VectorFont? = null;
     private var _fontSmall as Graphics.VectorFont? = null;
-    private var _fontText as Graphics.VectorFont? = null;
-    private var _fontSide as Graphics.VectorFont? = null;
+    private var _fontF1 as Graphics.VectorFont? = null;
+    private var _fontF2 as Graphics.VectorFont? = null;
+    private var _fontF3 as Graphics.VectorFont? = null;
+    private var _fontF4 as Graphics.VectorFont? = null;
+    private var _fontF5 as Graphics.VectorFont? = null;
 
     function initialize() {
         WatchFace.initialize();
@@ -101,24 +151,27 @@ class aviaView extends WatchUi.WatchFace {
         _cy = dc.getHeight() / 2;
         _s = dc.getWidth() / 400.0;
 
-        if (Graphics has :getVectorFont) {
-            _fontNum = Graphics.getVectorFont({
-                :face => ["RobotoCondensedBold", "RobotoCondensed", "Roboto"],
-                :size => Math.round(SIZE_NUM * _s).toNumber()
-            });
-            _fontSmall = Graphics.getVectorFont({
-                :face => ["RobotoCondensedRegular", "RobotoCondensed", "Roboto"],
-                :size => Math.round(SIZE_SMALL * _s).toNumber()
-            });
-            _fontText = Graphics.getVectorFont({
-                :face => ["RobotoCondensedRegular", "RobotoCondensed", "Roboto"],
-                :size => Math.round(SIZE_TEXT * _s).toNumber()
-            });
-            _fontSide = Graphics.getVectorFont({
-                :face => ["RobotoCondensedBold", "RobotoCondensed", "Roboto"],
-                :size => Math.round(SIZE_SIDE * _s).toNumber()
-            });
+        _fontNum = makeFont(true, SIZE_NUM);
+        _fontSmall = makeFont(false, SIZE_SMALL);
+        _fontF1 = makeFont(BOLD_F1, SIZE_F1);
+        _fontF2 = makeFont(BOLD_F2, SIZE_F2);
+        _fontF3 = makeFont(BOLD_F3, SIZE_F3);
+        _fontF4 = makeFont(BOLD_F4, SIZE_F4);
+        _fontF5 = makeFont(BOLD_F5, SIZE_F5);
+    }
+
+    // Police vectorielle condensée (gras ou non), mise à l'échelle de l'écran
+    private function makeFont(bold as Boolean, size as Number) as Graphics.VectorFont? {
+        if (!(Graphics has :getVectorFont)) {
+            return null;
         }
+        var face = bold
+            ? ["RobotoCondensedBold", "RobotoCondensed", "Roboto"]
+            : ["RobotoCondensedRegular", "RobotoCondensed", "Roboto"];
+        return Graphics.getVectorFont({
+            :face => face,
+            :size => Math.round(size * _s).toNumber()
+        });
     }
 
     function onEnterSleep() as Void {
@@ -131,7 +184,7 @@ class aviaView extends WatchUi.WatchFace {
         WatchUi.requestUpdate();
     }
 
-        function onUpdate(dc as Dc) as Void {
+    function onUpdate(dc as Dc) as Void {
         dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
         dc.clear();
         if (dc has :setAntiAlias) {
@@ -149,8 +202,7 @@ class aviaView extends WatchUi.WatchFace {
         var batteryLit = getBool("BatteryLit", true);
         var showIcons = getBool("ShowIcons", true);
         var fieldsOver = getBool("FieldsAbove", true);
-        // var f1 = getNum("Field1Type", 8); london
-        var f1 = getNum("Field1Type", 9);
+        var f1 = getNum("Field1Type", 9);   // 8 = fuseau secondaire, 9 = heure numérique
         var f2 = getNum("Field2Type", 3);
         var f3 = getNum("Field3Type", 2);
         var f4 = getNum("Field4Type", 1);
@@ -177,7 +229,7 @@ class aviaView extends WatchUi.WatchFace {
 
         // Champs derrière les aiguilles (option désactivée)
         if (showDial && !fieldsOver) {
-            drawFields(dc, f1, f2, f3, f4, showIcons, false);
+            drawFields(dc, f1, f2, f3, f4, showIcons);
         }
 
         // Aiguille du fuseau secondaire : sous les feuilles heures / minutes
@@ -191,9 +243,9 @@ class aviaView extends WatchUi.WatchFace {
             drawSecond(dc, sc);
         }
 
-        // Champs devant les aiguilles (option activée), avec contour noir
+        // Champs devant les aiguilles (option activée)
         if (showDial && fieldsOver) {
-            drawFields(dc, f1, f2, f3, f4, showIcons, true);
+            drawFields(dc, f1, f2, f3, f4, showIcons);
         }
 
         drawCenter(dc);
@@ -243,28 +295,52 @@ class aviaView extends WatchUi.WatchFace {
         dc.drawLine(p0[0], p0[1], p1[0], p1[1]);
     }
 
-    // Texte centré : police vectorielle si dispo, sinon police système de secours
+    // Texte avec justification au choix : police vectorielle si dispo, sinon police système
+    private function txtJ(dc as Dc, x as Numeric, y as Numeric, vf as Graphics.VectorFont?,
+                          fallback as Graphics.FontDefinition, s as String, just as Number) as Void {
+        if (vf != null) {
+            dc.drawText(x, y, vf, s, just);
+        } else {
+            dc.drawText(x, y, fallback, s, just);
+        }
+    }
+
+    // Texte centré
     private function txt(dc as Dc, x as Numeric, y as Numeric, vf as Graphics.VectorFont?,
                          fallback as Graphics.FontDefinition, s as String) as Void {
-        if (vf != null) {
-            dc.drawText(x, y, vf, s,
-                Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
-        } else {
-            dc.drawText(x, y, fallback, s,
-                Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
-        }
+        txtJ(dc, x, y, vf, fallback, s,
+             Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
     }
 
     // Texte aligné à gauche
     private function txtLeft(dc as Dc, x as Numeric, y as Numeric, vf as Graphics.VectorFont?,
                              fallback as Graphics.FontDefinition, s as String) as Void {
-        if (vf != null) {
-            dc.drawText(x, y, vf, s,
-                Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER);
-        } else {
-            dc.drawText(x, y, fallback, s,
-                Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER);
-        }
+        txtJ(dc, x, y, vf, fallback, s,
+             Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER);
+    }
+
+    // Décalage diagonal d'un contour d'épaisseur o (en pixels)
+    private function diag(o as Number) as Number {
+        return (o * 0.85 + 0.5).toNumber();
+    }
+
+    // Contour du texte : copies décalées dans 8 directions, à dessiner AVANT le texte.
+    // width = épaisseur en base 400 px, 0.0 = pas de contour.
+    private function outlineText(dc as Dc, x as Numeric, y as Numeric, vf as Graphics.VectorFont?,
+                                 fallback as Graphics.FontDefinition, s as String,
+                                 just as Number, width as Float) as Void {
+        if (width <= 0.0) { return; }
+        var o = px(width);
+        var d = diag(o);
+        dc.setColor(BORDER_COLOR, Graphics.COLOR_TRANSPARENT);
+        txtJ(dc, x + o, y, vf, fallback, s, just);
+        txtJ(dc, x - o, y, vf, fallback, s, just);
+        txtJ(dc, x, y + o, vf, fallback, s, just);
+        txtJ(dc, x, y - o, vf, fallback, s, just);
+        txtJ(dc, x + d, y + d, vf, fallback, s, just);
+        txtJ(dc, x - d, y + d, vf, fallback, s, just);
+        txtJ(dc, x + d, y - d, vf, fallback, s, just);
+        txtJ(dc, x - d, y - d, vf, fallback, s, just);
     }
 
     private function textWidth(dc as Dc, vf as Graphics.VectorFont?,
@@ -354,21 +430,49 @@ class aviaView extends WatchUi.WatchFace {
 
     // ---------- Champs personnalisables ----------
 
-    // Les 4 champs d'un coup (appelé avant ou après les aiguilles selon l'option)
+    // Les 5 champs d'un coup (appelé avant ou après les aiguilles selon l'option)
     private function drawFields(dc as Dc, f1 as Number, f2 as Number, f3 as Number,
-                                f4 as Number, showIcons as Boolean, halo as Boolean) as Void {
+                                f4 as Number, showIcons as Boolean) as Void {
         // Champ 1 (haut)
-        drawField(dc, _cx, _cy + F1_Y * _s, f1, _fontText, Graphics.FONT_SMALL,
-                  ICON_BIG, showIcons, halo);
+        drawField(dc, _cx + F1_X * _s, _cy + F1_Y * _s, f1, _fontF1, Graphics.FONT_SMALL,
+                  ICON_F1, COL_F1, BORDER_F1, showIcons);
         // Champ 2 (bas)
-        drawField(dc, _cx, _cy + F2_Y * _s, f2, _fontText, Graphics.FONT_SMALL,
-                  ICON_BIG, showIcons, halo);
-        // Champ 3 (droite, sans fond)
-        drawField(dc, _cx + F3_X * _s, _cy, f3, _fontSide, Graphics.FONT_XTINY,
-                  ICON_SIDE, showIcons, halo);
+        drawField(dc, _cx + F2_X * _s, _cy + F2_Y * _s, f2, _fontF2, Graphics.FONT_SMALL,
+                  ICON_F2, COL_F2, BORDER_F2, showIcons);
+        // Champ 3 (gauche, sous le champ 4)
+        drawField(dc, _cx + F3_X * _s, _cy + F3_Y * _s, f3, _fontF3, Graphics.FONT_XTINY,
+                  ICON_F3, COL_F3, BORDER_F3, showIcons);
         // Champ 4 (gauche)
-        drawField(dc, _cx + F4_X * _s, _cy, f4, _fontSide, Graphics.FONT_XTINY,
-                  ICON_SIDE, showIcons, halo);
+        drawField(dc, _cx + F4_X * _s, _cy + F4_Y * _s, f4, _fontF4, Graphics.FONT_XTINY,
+                  ICON_F4, COL_F4, BORDER_F4, showIcons);
+        // Champ 5 (droite : jour de la semaine + jour du mois)
+        if (SHOW_F5) {
+            drawField5(dc);
+        }
+    }
+
+    // Champ 5 : jour de la semaine au-dessus du jour du mois, même police et couleur
+    private function drawField5(dc as Dc) as Void {
+        var d = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
+        var days = ["DIM", "LUN", "MAR", "MER", "JEU", "VEN", "SAM"];
+        var dow = (d.day_of_week as Number) - 1;   // 1 = dimanche
+        if (dow < 0 || dow > 6) { dow = 0; }
+        var weekday = days[dow];
+        var dayNum = (d.day as Number).format("%02d");
+
+        var x = _cx + F5_X * _s;
+        var half = F5_GAP * _s / 2;
+        var yTop = _cy + F5_Y * _s - half;
+        var yBottom = _cy + F5_Y * _s + half;
+        var just = Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER;
+
+        // Contour d'abord, puis le texte par-dessus
+        outlineText(dc, x, yTop, _fontF5, Graphics.FONT_SMALL, weekday, just, BORDER_F5);
+        outlineText(dc, x, yBottom, _fontF5, Graphics.FONT_SMALL, dayNum, just, BORDER_F5);
+
+        dc.setColor(COL_F5, Graphics.COLOR_TRANSPARENT);
+        txt(dc, x, yTop, _fontF5, Graphics.FONT_SMALL, weekday);
+        txt(dc, x, yBottom, _fontF5, Graphics.FONT_SMALL, dayNum);
     }
 
     // Id du logo : types 1 à 7 ont un logo (1 cœur, 2 éclair, 3 horloge,
@@ -458,31 +562,32 @@ class aviaView extends WatchUi.WatchFace {
         return (icon > 0) ? (isz * _s + 4 * _s) : 0.0;
     }
 
-    // Dessine logo + texte centrés sur (cx, cy). halo = contour noir autour du texte
+    // Dessine logo + texte centrés sur (cx, cy), avec contour (bw = épaisseur, 0.0 = aucun)
     private function drawField(dc as Dc, cx as Numeric, cy as Numeric, type as Number,
                                vf as Graphics.VectorFont?, fallback as Graphics.FontDefinition,
-                               isz as Float, showIcons as Boolean, halo as Boolean) as Void {
+                               isz as Float, color as Number, bw as Float,
+                               showIcons as Boolean) as Void {
         if (type == 0) { return; }
         var icon = showIcons ? fieldIcon(type) : 0;
         var text = fieldText(type, showIcons);
         var tw = textWidth(dc, vf, fallback, text);
         var iw = iconWidth(icon, isz);
         var x = cx - (tw + iw) / 2;
+        var ix = x + isz * _s / 2;
+        var ir = isz * _s / 2;
+        var just = Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER;
 
+        // 1. Contours (logo puis texte)
+        if (icon > 0 && BORDER_ICONS) {
+            outlineIcon(dc, icon, ix, cy, ir, bw);
+        }
+        outlineText(dc, x + iw, cy, vf, fallback, text, just, bw);
+
+        // 2. Logo puis texte par-dessus
         if (icon > 0) {
-            drawIcon(dc, icon, x + isz * _s / 2, cy, isz * _s / 2);
+            drawIcon(dc, icon, ix, cy, ir);
         }
-
-        if (halo) {
-            var o = px(1.5);
-            dc.setColor(0x000000, Graphics.COLOR_TRANSPARENT);
-            txtLeft(dc, x + iw - o, cy, vf, fallback, text);
-            txtLeft(dc, x + iw + o, cy, vf, fallback, text);
-            txtLeft(dc, x + iw, cy - o, vf, fallback, text);
-            txtLeft(dc, x + iw, cy + o, vf, fallback, text);
-        }
-
-        dc.setColor(C_FIELD, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(color, Graphics.COLOR_TRANSPARENT);
         txtLeft(dc, x + iw, cy, vf, fallback, text);
     }
 
@@ -492,11 +597,34 @@ class aviaView extends WatchUi.WatchFace {
         return [ x, y ] as [Numeric, Numeric];
     }
 
+    // Couleur d'un logo : sa couleur propre, ou la couleur unique du contour
+    private function ic(c as Number) as Number {
+        return (_iconMono >= 0) ? _iconMono : c;
+    }
+
+    // Contour d'un logo : sa silhouette dessinée en une seule couleur, décalée dans 8 directions
+    private function outlineIcon(dc as Dc, id as Number, x as Float, y as Float, r as Float,
+                                 width as Float) as Void {
+        if (width <= 0.0) { return; }
+        var o = px(width);
+        var d = diag(o);
+        _iconMono = BORDER_COLOR;
+        drawIcon(dc, id, x + o, y, r);
+        drawIcon(dc, id, x - o, y, r);
+        drawIcon(dc, id, x, y + o, r);
+        drawIcon(dc, id, x, y - o, r);
+        drawIcon(dc, id, x + d, y + d, r);
+        drawIcon(dc, id, x - d, y + d, r);
+        drawIcon(dc, id, x + d, y - d, r);
+        drawIcon(dc, id, x - d, y - d, r);
+        _iconMono = -1;
+    }
+
     // Centré sur (x, y), r = demi-taille
     private function drawIcon(dc as Dc, id as Number, x as Float, y as Float, r as Float) as Void {
         if (id == 1) {
             // Cœur
-            dc.setColor(0xFF3355, Graphics.COLOR_TRANSPARENT);
+            dc.setColor(ic(0xFF3355), Graphics.COLOR_TRANSPARENT);
             dc.fillCircle(x - 0.5 * r, y - 0.3 * r, 0.52 * r);
             dc.fillCircle(x + 0.5 * r, y - 0.3 * r, 0.52 * r);
             dc.fillPolygon([
@@ -504,35 +632,35 @@ class aviaView extends WatchUi.WatchFace {
             ] as Array<[Numeric, Numeric]>);
         } else if (id == 2) {
             // Éclair (Body Battery)
-            dc.setColor(0x33CCFF, Graphics.COLOR_TRANSPARENT);
+            dc.setColor(ic(0x33CCFF), Graphics.COLOR_TRANSPARENT);
             dc.fillPolygon([
                 q(x + 0.15 * r, y - r), q(x - 0.55 * r, y + 0.1 * r), q(x - 0.05 * r, y + 0.1 * r),
                 q(x - 0.2 * r, y + r), q(x + 0.55 * r, y - 0.15 * r), q(x + 0.05 * r, y - 0.15 * r)
             ] as Array<[Numeric, Numeric]>);
         } else if (id == 3) {
             // Horloge (récupération)
-            dc.setColor(0x66DD66, Graphics.COLOR_TRANSPARENT);
+            dc.setColor(ic(0x66DD66), Graphics.COLOR_TRANSPARENT);
             dc.setPenWidth(px(2.0));
             dc.drawCircle(x, y, 0.9 * r);
             dc.drawLine(x, y, x, y - 0.55 * r);
             dc.drawLine(x, y, x + 0.4 * r, y);
         } else if (id == 4) {
             // Pas : deux empreintes
-            dc.setColor(0xDDDDDD, Graphics.COLOR_TRANSPARENT);
+            dc.setColor(ic(0xDDDDDD), Graphics.COLOR_TRANSPARENT);
             dc.fillCircle(x - 0.45 * r, y + 0.35 * r, 0.38 * r);
             dc.fillCircle(x - 0.45 * r, y - 0.3 * r, 0.25 * r);
             dc.fillCircle(x + 0.45 * r, y + 0.1 * r, 0.38 * r);
             dc.fillCircle(x + 0.45 * r, y - 0.55 * r, 0.25 * r);
         } else if (id == 5) {
             // Flamme (calories)
-            dc.setColor(0xFF8800, Graphics.COLOR_TRANSPARENT);
+            dc.setColor(ic(0xFF8800), Graphics.COLOR_TRANSPARENT);
             dc.fillCircle(x, y + 0.35 * r, 0.6 * r);
             dc.fillPolygon([
                 q(x - 0.55 * r, y + 0.2 * r), q(x + 0.55 * r, y + 0.2 * r), q(x + 0.1 * r, y - r)
             ] as Array<[Numeric, Numeric]>);
         } else if (id == 6) {
             // Repère de position (distance)
-            dc.setColor(0x44AAFF, Graphics.COLOR_TRANSPARENT);
+            dc.setColor(ic(0x44AAFF), Graphics.COLOR_TRANSPARENT);
             dc.fillCircle(x, y - 0.35 * r, 0.6 * r);
             dc.fillPolygon([
                 q(x - 0.5 * r, y - 0.05 * r), q(x + 0.5 * r, y - 0.05 * r), q(x, y + r)
@@ -541,7 +669,7 @@ class aviaView extends WatchUi.WatchFace {
             dc.fillCircle(x, y - 0.35 * r, 0.22 * r);
         } else if (id == 7) {
             // Courbe de stress
-            dc.setColor(0xFF8844, Graphics.COLOR_TRANSPARENT);
+            dc.setColor(ic(0xFF8844), Graphics.COLOR_TRANSPARENT);
             dc.setPenWidth(px(2.0));
             dc.drawLine(x - r, y, x - 0.5 * r, y);
             dc.drawLine(x - 0.5 * r, y, x - 0.25 * r, y - 0.8 * r);
@@ -645,7 +773,7 @@ class aviaView extends WatchUi.WatchFace {
         line(dc, ang, -40.0, 177.0);
     }
 
-        // Rectangle le long de l'aiguille : de v0 à v1, demi-largeur hw
+    // Rectangle le long de l'aiguille : de v0 à v1, demi-largeur hw
     private function bar(dc as Dc, angle as Float, v0 as Float, v1 as Float, hw as Float) as Void {
         dc.fillPolygon([
             pt(angle, -hw, v0), pt(angle, hw, v0),
